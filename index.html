@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Format Tools 仓库</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: #333;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        flex: 0 0 auto;
+      }
+
+      main {
+        flex: 1 1 auto;
+        overflow-y: auto;
+        padding: 2rem;
+        box-sizing: border-box;
+      }
+
+      footer {
+        background: #333;
+        color: white;
+        padding: 1rem;
+        text-align: center;
+        flex: 0 0 auto;
+      }
+
+      h1 {
+        margin-bottom: 0.5rem;
+      }
+      p {
+        margin-top: 0;
+      }
+
+      /* 工具卡片网格布局 */
+      /* .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.5rem;
+      } */
+
+      .tool-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .tool-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+
+      .tool-card a {
+        text-decoration: none;
+        color: #fff;
+        background: #007bff;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 1rem;
+      }
+
+      .tools-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(3, 1fr); /* 默认 3 列 */
+      }
+
+      /* 1440px 及以上显示 4 列 */
+      @media (min-width: 1440px) and (max-width: 1919px) {
+        .tools-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      /* 1920px 及以上显示 5 列 */
+      @media (min-width: 1920px) {
+        .tools-grid {
+          grid-template-columns: repeat(5, 1fr);
+        }
+      }
+
+      /* 手机和小屏幕单列自适应 */
+      @media (max-width: 768px) {
+        .tools-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .tools-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Format Tools 仓库</h1>
+      <p>点击下方工具进入对应页面</p>
+    </header>
+    <main>
+      <div class="tools-grid">
+        <!-- 工具卡片示例 -->
+        <div class="tool-card">
+          <h2>JSON → TypeScript</h2>
+          <p>将 JSON 数据转换成 TS 类型定义</p>
+          <a href="./json-to-ts/index.html" target="_blank">进入工具</a>
+        </div>
+
+        <!-- 未来可以继续添加新工具 -->
+      </div>
+    </main>
+    <footer>&copy; 阿珍 | shengzr1998@163.com</footer>
+  </body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Schema / JSON → TypeScript 类型</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body,
+      html {
+        height: 100%;
+        font-family: Arial, sans-serif;
+      }
+
+      header{
+        background-color: #1e293b;
+        color: #fff;
+        padding: 1rem;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .main {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 100px);
+        overflow: hidden;
+      }
+
+      .content {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        overflow: auto;
+      }
+
+      .side {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0; /* 避免内容溢出导致重叠 */
+      }
+
+      textarea,
+      pre {
+        flex: 1;
+        width: 100%;
+        padding: 1rem;
+        resize: none;
+        overflow: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 14px;
+      }
+
+      .buttons-left,
+      .buttons-right {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .buttons-left button {
+        flex: 1;
+      }
+
+      .buttons-right {
+        justify-content: flex-end;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 4px;
+        background-color: #3b82f6;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #2563eb;
+      }
+
+      .copy-tip {
+        font-size: 12px;
+        color: #67c23a;
+        display: none;
+        margin-left: 8px;
+      }
+
+      /* 响应式布局 */
+      @media (max-width: 768px) {
+        .content {
+          flex-direction: column;
+        }
+        .buttons-right {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>JSON → TypeScript 工具</h1>
+    </header>
+
+    <div class="main">
+      <div class="content">
+        <!-- 左边 -->
+        <div class="side left">
+          <textarea
+            id="input"
+            placeholder="粘贴 JSON 或已转换的 TypeScript 类型"
+          ></textarea>
+          <div class="buttons-left">
+            <button onclick="convert()">格式化</button>
+            <button onclick="clearInput()">清空</button>
+          </div>
+        </div>
+        <!--右边-->
+        <div class="side right">
+          <textarea id="output" readonly></textarea>
+          <div class="buttons-right">
+            <span id="copyTip" class="copy-tip">已复制</span>
+            <button onclick="copyResult()">一键复制</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function convert() {
+        const input = document.getElementById("input").value;
+        const output = document.getElementById("output");
+
+        if (!input.trim()) {
+          output.value = "";
+          return;
+        }
+
+        try {
+          const normalized = normalizeSchema(input);
+          const json = JSON.parse(normalized);
+          const result = generateTypes(json, "RootResponse");
+          output.value = result;
+        } catch (e) {
+          output.value = "解析失败：\n" + e.message;
+        }
+      }
+
+      function clearInput() {
+        document.getElementById("input").value = "";
+        document.getElementById("output").value = "";
+      }
+
+      function normalizeSchema(text) {
+        return text
+          .replace(/export\s+(interface|type)[\s\S]*?\}/g, "")
+          .replace(/interface\s+\w+[\s\S]*?\}/g, "")
+          .replace(/\\\[/g, "[")
+          .replace(/\\\]/g, "]")
+          .replace(/:\s*string/g, ': "string"')
+          .replace(/:\s*number/g, ": 0")
+          .replace(/:\s*boolean/g, ": false")
+          .replace(/:\s*any/g, ": null")
+          .replace(/\\(?!["\\/bfnrtu])/g, "");
+      }
+
+      function generateTypes(obj, rootName) {
+        const interfaces = [];
+        parseObject(obj, rootName, interfaces);
+        return interfaces.reverse().join("\n\n");
+      }
+
+      function parseObject(obj, name, interfaces) {
+        if (typeof obj !== "object" || obj === null) return;
+
+        const lines = [];
+        for (const key in obj) {
+          const value = obj[key];
+          const type = resolveType(value, capitalize(key), interfaces);
+          lines.push(`  ${key}: ${type};`);
+        }
+
+        interfaces.push(`export interface ${name} {\n${lines.join("\n")}\n}`);
+      }
+
+      function resolveType(value, name, interfaces) {
+        if (Array.isArray(value)) {
+          if (!value.length) return "any[]";
+          const itemType = resolveType(value[0], name + "Item", interfaces);
+          return `${itemType}[]`;
+        }
+
+        switch (typeof value) {
+          case "string":
+            return "string";
+          case "number":
+            return "number";
+          case "boolean":
+            return "boolean";
+          case "object":
+            if (value === null) return "any";
+            parseObject(value, name, interfaces);
+            return name;
+          default:
+            return "any";
+        }
+      }
+
+      function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }
+
+      function copyResult() {
+        const output = document.getElementById("output");
+        if (!output.value) return;
+
+        navigator.clipboard.writeText(output.value).then(() => {
+          const tip = document.getElementById("copyTip");
+          tip.style.display = "inline";
+          setTimeout(() => (tip.style.display = "none"), 1500);
+        });
+      }
+    </script>
+  </body>
+</html>
